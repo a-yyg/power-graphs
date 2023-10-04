@@ -7,6 +7,8 @@ import pandas as pd
 
 leeway_time = 2 # 2 seconds before the start time, 2 seconds after the end time
 
+output_folder = "output"
+
 # Function to load JSON data
 def load_json(file_path):
     print("Loading " + file_path)
@@ -49,8 +51,10 @@ def process_data(power_data, exp_file_path, exp_file_info):
     # print(power_data)
     # print(power_data.keys())
 
-    power_data_time = pd.to_datetime(power_data['Hour:Minute:Second'].iloc[-1], format='%H:%M:%S') - pd.to_datetime(power_data['Hour:Minute:Second'].iloc[0], format='%H:%M:%S')
-    exp_data_time = pd.to_datetime(end_time, format='%H:%M:%S') - pd.to_datetime(start_time, format='%H:%M:%S')
+    power_data_time = pd.to_datetime(power_data['Hour:Minute:Second'].iloc[-1], format='%H:%M:%S') -\
+        pd.to_datetime(power_data['Hour:Minute:Second'].iloc[0], format='%H:%M:%S')
+    exp_data_time = pd.to_datetime(end_time, format='%H:%M:%S') -\
+        pd.to_datetime(start_time, format='%H:%M:%S')
     # print("Power data time: " + str(power_data_time))
     # print("Experiment data time: " + str(exp_data_time))
     power_data_time = power_data_time.total_seconds()
@@ -60,8 +64,13 @@ def process_data(power_data, exp_file_path, exp_file_info):
         print("Power data time: " + str(power_data_time))
         print("Experiment data time: " + str(exp_data_time))
 
-    parent_folder = os.path.dirname(exp_file_path)
-    write_csv(power_data, os.path.join(parent_folder, exp_file_info['name']))
+    parent_folder = os.path.split(os.path.dirname(exp_file_path))[-1]
+    folder = os.path.join(output_folder, parent_folder)
+
+    if not os.path.isdir(folder):
+        os.mkdir(folder)
+
+    write_csv(power_data, os.path.join(folder, exp_file_info['name']))
 
 def get_start_end_time(exp_file_path):
     # Look for the first row
